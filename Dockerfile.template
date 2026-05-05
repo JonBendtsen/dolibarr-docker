@@ -61,6 +61,7 @@ RUN apt-get update -y \
         default-mysql-client \
         postgresql-client \
         vim-tiny \
+        libmailutils-dev \
         cron \
     && rm -rf /var/lib/apt/lists/*
 
@@ -128,22 +129,37 @@ ENV PHP_INI_UPLOAD_MAX_FILESIZE=20M
 ENV PHP_INI_POST_MAX_SIZE=22M
 ENV PHP_INI_ALLOW_URL_FOPEN=0
 
-# Copy the compiled FrankenPHP binary from builder
+# 1. Copy the FrankenPHP Binary (if you built a custom one)
+# If using the standard image, this line is optional but safe.
 COPY --from=builder /usr/local/bin/frankenphp /usr/local/bin/frankenphp
 
-# Copy the compiled PHP extensions from builder
+# 2. CRITICAL: Copy the PHP Extensions (.so files)
 COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
 
-# Copy the application code and directories from builder
+# 3. CRITICAL: Copy the Configuration Files (.ini files)
+# This is what tells PHP to LOAD the extensions we just copied.
+COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
+
+# 4. Copy the modified php.ini (for global settings like expose_php)
+COPY --from=builder ${PHP_INI_DIR}/php.ini ${PHP_INI_DIR}/php.ini
+
+# 5. Copy Application Code
 COPY --from=builder /app /app
 
-# Copy the configured php.ini from builder (if it wasn't baked into the base image)
-# Note: The install-php-extensions script usually modifies the image's php.ini directly.
-# If the base image is clean, we might need to copy the modified ini file.
-# However, since we ran the sed command in the builder, the extensions are active there.
-# We rely on the extensions being copied above. The ini settings are usually global.
-# If you need the specific php.ini modifications, copy it:
-COPY --from=builder ${PHP_INI_DIR}/php.ini ${PHP_INI_DIR}/php.ini
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpng16-16t64 \
+    libjpeg62-turbo \
+    libfreetype6 \
+    libicu76 \
+    libldap2 \
+    libpq5 \
+    libavif16 \
+    libtidy58 \
+    libwebp7 \
+    libxpm4 \
+    libmailutils9t64 \
+    libzip5 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Expose port
 EXPOSE 80
