@@ -3,13 +3,13 @@
 # Compiles extensions, installs dependencies, and prepares the application
 # ==============================================================================
 ARG ARCH=
-FROM ${ARCH}dunglas/frankenphp:%PHP_BASE_IMAGE% AS builder
+FROM ${ARCH}dunglas/frankenphp:1-php8.3 AS builder
 
 LABEL maintainer="The Dolibarr foundation <contact@dolibarr.org>"
 
 # Environment Variables
-ENV DOLI_VERSION=%DOLI_VERSION%
-ENV DOLI_VERSION_FOR_INIT_DEMO=%DOLI_VERSION_FOR_INIT_DEMO%
+ENV DOLI_VERSION=21.0.4
+ENV DOLI_VERSION_FOR_INIT_DEMO=21.0
 ENV DOLI_INSTALL_AUTO=1
 ENV DOLI_PROD=1
 
@@ -96,10 +96,10 @@ RUN chown -R www-data:www-data /app
 # Minimal image containing only the binary, extensions, and app code
 # ==============================================================================
 # Use the standard runtime image (no -builder suffix)
-FROM ${ARCH}dunglas/frankenphp:%PHP_BASE_IMAGE% AS runtime
+FROM ${ARCH}dunglas/frankenphp:1-php8.3 AS runtime
 
 # Copy environment variables from builder (optional, but good for consistency)
-ENV DOLI_VERSION=%DOLI_VERSION%
+ENV DOLI_VERSION=21.0.4
 ENV DOLI_INSTALL_AUTO=1
 ENV DOLI_PROD=1
 ENV DOLI_DB_TYPE=mysqli
