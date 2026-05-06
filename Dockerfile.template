@@ -58,16 +58,32 @@ RUN apt-get update -y \
         libxml2-dev \
         libzip-dev \
         libtidy-dev \
+        libbz2-dev \
         default-mysql-client \
         postgresql-client \
         vim-tiny \
-        libmailutils-dev \
         cron \
+        locales \
+        tzdata \
+    && ln -sf /usr/share/zoneinfo/UTC /etc/localtime \
+    && echo "UTC" > /etc/timezone \
+    && dpkg-reconfigure -f noninteractive tzdata \
+    && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen \
+    && locale-gen en_US.UTF-8 \
+    && update-locale LANG=en_US.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
+
+
+    # 3. Set Environment Variables for the container
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+
+# ... (Continue with install-php-extensions)
 
 # 2. Compile PHP Extensions
 RUN install-php-extensions \
     gd \
+    calendar \
     intl \
     mysqli \
     pdo_mysql \
@@ -76,10 +92,31 @@ RUN install-php-extensions \
     opcache \
     tidy \
     pgsql \
+    pdo_pgsql \
     ldap \
-    imap \
+    bz2 \
     && mv ${PHP_INI_DIR}/php.ini-production ${PHP_INI_DIR}/php.ini \
     && sed -i 's/expose_php = On/expose_php = Off/g' ${PHP_INI_DIR}/php.ini
+
+
+# 3. AGGRESSIVE CLEANUP (Critical for Multi-Stage)
+# We explicitly remove the build tools that install-php-extensions leaves behind
+RUN apt-get remove -y --purge \
+    gcc \
+    g++ \
+    cpp \
+    make \
+    autoconf \
+    automake \
+    libtool \
+    dpkg-dev \
+    binutils \
+    libc6-dev \
+    libc-dev-bin \
+    linux-libc-dev \
+    && apt-get autoremove -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # 3. Download and Prepare Dolibarr Application
 RUN curl -fLSs https://github.com/Dolibarr/dolibarr/archive/${DOLI_VERSION}.tar.gz |\
@@ -146,20 +183,55 @@ COPY --from=builder ${PHP_INI_DIR}/php.ini ${PHP_INI_DIR}/php.ini
 # 5. Copy Application Code
 COPY --from=builder /app /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpng16-16t64 \
-    libjpeg62-turbo \
-    libfreetype6 \
-    libicu76 \
-    libldap2 \
-    libpq5 \
-    libavif16 \
-    libtidy58 \
-    libwebp7 \
-    libxpm4 \
-    libmailutils9t64 \
-    libzip5 \
+# 6. Install Runtime Libraries for Debian Trixie (Robust Version)
+RUN apt-get update && \
+    # Try to install the standard packages first
+    apt-get install -y --no-install-recommends \
+        libpng16-16t64 \
+        libjpeg62-turbo \
+        libfreetype6 \
+        libavif16 \
+        libwebp7 \
+        libxpm4 \
+        libbz2-1.0 \
+        libsasl2-2 \
+        libldap2 \
+        libkrb5-3 \
+        libicu76 \
+        libpq5 \
+        libtidy58 \
+        libzip5 \
+        default-mysql-client \
+        postgresql-client \
+        locales \
+        tzdata \
+    && ln -sf /usr/share/zoneinfo/UTC /etc/localtime \
+    && echo "UTC" > /etc/timezone \
+    && dpkg-reconfigure -f noninteractive tzdata \
+    && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen \
+    && locale-gen en_US.UTF-8 \
+    && update-locale LANG=en_US.UTF-8 \
+    && apt-get remove -y --purge gcc g++ cpp make autoconf automake libtool dpkg-dev binutils libc6-dev libc-dev-bin linux-libc-dev \
+                        mailcap \
+                        file \
+                        libgdbm6t64 \
+                        libmagic-mgc \
+                        libmagic1t64 \
+                        libperl5.40 \
+                        media-types \
+                        xz-utils \
+                        libperl5.40 \
+                        libgdbm6t64 \
+                        file  libmagic1t64 libpkgconf3 mailcap media-types  pkg-config pkgconf pkgconf-bin re2c xz-utils \
+    && apt-get autoremove -y \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+
+# 2. Set Environment Variables
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+
 
 # Expose port
 EXPOSE 80

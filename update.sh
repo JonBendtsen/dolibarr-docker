@@ -107,7 +107,9 @@ for dolibarrVersion in "${DOLIBARR_VERSIONS[@]}"; do
 
     if [ "${PODMAN_BUILD}" = "1" ]; then
         podman build \
+          --no-cache \
           --compress \
+          --target runtime \
           ${buildOptionTags} \
           "${dir}"
     fi
