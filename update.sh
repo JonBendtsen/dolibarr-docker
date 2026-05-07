@@ -41,11 +41,11 @@ for dolibarrVersion in "${DOLIBARR_VERSIONS[@]}"; do
   # Mapping PHP version according to Dolibarr version (See https://wiki.dolibarr.org/index.php/Versions)
   # Regarding PHP Supported version : https://www.php.net/supported-versions.php
   if [ "${dolibarrVersion}" = "develop" ]; then
-    php_base_images=( "1-php8.4" )
+    php_base_images=( "1-php8.2" )
   elif [ "${dolibarrMajor}" -ge "22" ]; then
-    php_base_images=( "1-php8.4" )
+    php_base_images=( "1-php8.2" )
   elif [ "${dolibarrMajor}" -ge "21" ]; then
-    php_base_images=( "1-php8.3" )
+    php_base_images=( "1-php8.2" )
   elif [ "${dolibarrMajor}" -ge "19" ]; then
     php_base_images=( "1-php8.2" )
   else

@@ -3,7 +3,7 @@
 # Compiles extensions, installs dependencies, and prepares the application
 # ==============================================================================
 ARG ARCH=
-FROM ${ARCH}dunglas/frankenphp:1-php8.4 AS builder
+FROM ${ARCH}dunglas/frankenphp:1-php8.2 AS builder
 
 LABEL maintainer="The Dolibarr foundation <contact@dolibarr.org>"
 
@@ -134,7 +134,7 @@ RUN chown -R www-data:www-data /app
 # Minimal image containing only the binary, extensions, and app code
 # ==============================================================================
 # Use the standard runtime image (no -builder suffix)
-FROM ${ARCH}dunglas/frankenphp:1-php8.4 AS runtime
+FROM ${ARCH}dunglas/frankenphp:1-php8.2 AS runtime
 
 # Copy environment variables from builder (optional, but good for consistency)
 ENV DOLI_VERSION=develop
