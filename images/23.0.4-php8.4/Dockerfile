@@ -13,8 +13,13 @@ FROM ${ARCH}php:8.4-apache-bookworm
 # 2025 Renato de Castro Ferreira
 LABEL maintainer="The Dolibarr foundation <contact@dolibarr.org>"
 
+<<<<<<<< HEAD:images/23.0.4-php8.4/Dockerfile
 ENV DOLI_VERSION=23.0.4
 ENV DOLI_VERSION_FOR_INIT_DEMO=23.0
+========
+ENV DOLI_VERSION=24.0.2
+ENV DOLI_VERSION_FOR_INIT_DEMO=24.0
+>>>>>>>> c17048f (24.0.2: Releasing docker image v24.0.2 - there is a tag, but not a release):images/24.0.2-php8.2/Dockerfile
 ENV DOLI_INSTALL_AUTO=1
 ENV DOLI_PROD=1
 
