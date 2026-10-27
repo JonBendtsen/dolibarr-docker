@@ -173,6 +173,7 @@ You can use the following variables for a better customization of your docker-co
 | **DOLI_LDAP_BIND_DN**           |                                | The complete DN of the user with read access on users
 | **DOLI_LDAP_BIND_PASS**         |                                | The password of the bind user
 | **DOLI_LDAP_DEBUG**             | *false*                        | Activate debug mode
+| **DOLI_LOCK_WEB_ROOT**          | *1*                            | 1: Make the Dolibarr code in the web root read-only at container start (directories 555, files 444). Set to 0 to keep permissions as-is. See section "Locking down web root file permissions".
 | **DOLI_CRON**                   | *0*                            | 1: Enable cron service
 | **DOLI_CRON_KEY**               |                                | Security key to launch cron jobs
 | **DOLI_CRON_USER**              |                                | Dolibarr user used to launch cron jobs (will use firstadmin if not defined)
